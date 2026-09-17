@@ -27,9 +27,9 @@
         }
 
         body {
+            max-width: 960px;
             margin: 0 auto;
             padding: 20px;
-            max-width: 960px;
 
             background: var(--background);
             color: var(--text);
@@ -162,10 +162,6 @@
             background: var(--blue);
         }
 
-        .dark-button {
-            background: #333333;
-        }
-
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -251,53 +247,6 @@
             font-weight: 700;
         }
 
-        .preview-area {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
-            gap: 16px;
-        }
-
-        .preview-box {
-            padding: 12px;
-
-            border-radius: 12px;
-            background: #F5F5F7;
-            text-align: center;
-        }
-
-        .preview-box canvas {
-            display: block;
-            margin: 0 auto 8px;
-            border-radius: 10px;
-        }
-
-        .icon-preview canvas {
-            width: 116px;
-            height: 116px;
-        }
-
-        .logo-preview canvas {
-            width: 240px;
-            height: 75px;
-        }
-
-        .strip-preview canvas {
-            width: 300px;
-            height: 98px;
-        }
-
-        .qr-preview canvas {
-            width: 220px;
-            height: 220px;
-            background: #FFFFFF;
-        }
-
-        .preview-caption {
-            color: var(--muted);
-            font-size: 12px;
-        }
-
         .route-preview {
             position: relative;
             overflow: hidden;
@@ -336,7 +285,6 @@
             justify-content: space-between;
             gap: 12px;
 
-            color: #FFFFFF;
             font-size: 14px;
             font-weight: 700;
         }
@@ -391,6 +339,53 @@
             font-size: 14px;
         }
 
+        .preview-area {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .preview-box {
+            padding: 12px;
+
+            border-radius: 12px;
+            background: #F5F5F7;
+            text-align: center;
+        }
+
+        .preview-box canvas {
+            display: block;
+            margin: 0 auto 8px;
+            border-radius: 10px;
+        }
+
+        .icon-preview canvas {
+            width: 116px;
+            height: 116px;
+        }
+
+        .logo-preview canvas {
+            width: 240px;
+            height: 75px;
+        }
+
+        .strip-preview canvas {
+            width: 300px;
+            height: 98px;
+        }
+
+        .qr-preview canvas {
+            width: 220px;
+            height: 220px;
+            background: #FFFFFF;
+        }
+
+        .preview-caption {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
         .qr-source {
             margin-top: 14px;
             padding: 12px;
@@ -407,27 +402,26 @@
     <h1>🎫 PKP Intercity → Apple Wallet</h1>
 
     <p>
-        Tworzy pomocniczy pass Apple Wallet na podstawie biletu PDF.
+        Twórz pomocniczy pass Apple Wallet z danych biletu PKP Intercity.
     </p>
 
     <div class="warning">
         <strong>⚠️ Ważne:</strong>
         To nie jest oficjalny bilet PKP Intercity.
-        Pass służy wyłącznie jako pomocnicza wizualizacja.
+        Pass służy wyłącznie jako pomocnicza wizualizacja biletu.
     </div>
 
     <div class="info">
-        <strong>Dlaczego poprzedni plik się nie dodawał?</strong>
-        Prawdopodobnie dlatego, że brakowało podpisu Apple w pliku
-        <code>signature</code>. Kod poniżej odczytuje QR i tworzy cały pakiet,
-        ale bez certyfikatu Apple nie może wygenerować prawidłowego podpisu.
+        <strong>Odczyt PDF:</strong>
+        ten kod nie korzysta z jsQR. Odczytuje tekst bezpośrednio z PDF,
+        co jest właściwe dla przesłanego biletu tekstowego.
     </div>
 
     <div class="card">
         <h2>📄 1. Wybierz PDF biletu</h2>
 
         <p class="muted">
-            Aplikacja spróbuje odczytać tekst oraz kod QR.
+            Aplikacja odczyta dane podróży i przygotuje pomocniczy kod QR.
         </p>
 
         <input
@@ -439,12 +433,13 @@
         <div id="pdfStatus" class="status"></div>
 
         <div
-            id="qrSourceBox"
-            class="qr-source"
+            id="pdfTextBox"
             style="display: none;"
         >
-            <strong>Odczytany kod QR:</strong>
-            <pre id="qrSourceText"></pre>
+            <details>
+                <summary>Pokaż tekst odczytany z PDF</summary>
+                <pre id="pdfTextOutput"></pre>
+            </details>
         </div>
     </div>
 
@@ -462,7 +457,7 @@
                     <input
                         id="trainNumber"
                         type="text"
-                        placeholder="np. IC 5102"
+                        placeholder="np. EIP 3508"
                         required
                     >
                 </div>
@@ -475,6 +470,7 @@
                     <select id="trainCategory">
                         <option value="IC">IC</option>
                         <option value="EIC">EIC</option>
+                        <option value="EIP">EIP</option>
                         <option value="TLK">TLK</option>
                         <option value="EC">EC</option>
                         <option value="EN">EN</option>
@@ -518,7 +514,7 @@
                     <input
                         id="from"
                         type="text"
-                        placeholder="np. Kraków Główny"
+                        placeholder="np. Kraków Gł."
                         required
                     >
                 </div>
@@ -531,7 +527,7 @@
                     <input
                         id="to"
                         type="text"
-                        placeholder="np. Warszawa Centralna"
+                        placeholder="np. Gdańsk Oliwa"
                         required
                     >
                 </div>
@@ -546,7 +542,7 @@
                     <input
                         id="seat"
                         type="text"
-                        placeholder="np. 12A"
+                        placeholder="np. 44"
                         required
                     >
                 </div>
@@ -559,7 +555,7 @@
                     <input
                         id="coach"
                         type="text"
-                        placeholder="np. 5"
+                        placeholder="np. 4"
                     >
                 </div>
             </div>
@@ -585,7 +581,33 @@
                     <input
                         id="ticketNumber"
                         type="text"
-                        placeholder="np. 123456789"
+                        placeholder="np. WL 94742573"
+                    >
+                </div>
+            </div>
+
+            <div class="grid">
+                <div>
+                    <label for="referenceNumber">
+                        Numer referencyjny
+                    </label>
+
+                    <input
+                        id="referenceNumber"
+                        type="text"
+                        placeholder="np. 513557067349"
+                    >
+                </div>
+
+                <div>
+                    <label for="emergencyCode">
+                        Kod awaryjny
+                    </label>
+
+                    <input
+                        id="emergencyCode"
+                        type="text"
+                        placeholder="np. 6347"
                     >
                 </div>
             </div>
@@ -598,7 +620,7 @@
                 >
 
                 <label for="includeDisclaimer">
-                    Dodaj na odwrocie informację o nieoficjalnym charakterze passa.
+                    Dodaj informację, że pass jest nieoficjalny.
                 </label>
             </div>
 
@@ -623,7 +645,7 @@
     </div>
 
     <div class="card">
-        <h2>🎨 Podgląd grafiki</h2>
+        <h2>🎨 Grafika passa</h2>
 
         <div class="grid">
             <div>
@@ -665,18 +687,19 @@
 
         <div class="route-preview">
             <div class="route-top">
-                <span id="routeTrainPreview">IC 0000</span>
-                <span id="routeDatePreview">DATA</span>
+                <span id="routeTrainPreview">EIP 3508</span>
+                <span id="routeDatePreview">18.09.2026</span>
             </div>
 
             <div class="route-main">
                 <div class="station">
                     <div class="station-label">Odjazd</div>
+
                     <div
                         id="routeFromPreview"
                         class="station-name"
                     >
-                        STACJA A
+                        Kraków Gł.
                     </div>
                 </div>
 
@@ -684,17 +707,19 @@
 
                 <div class="station">
                     <div class="station-label">Przyjazd</div>
+
                     <div
                         id="routeToPreview"
                         class="station-name"
                     >
-                        STACJA B
+                        Gdańsk Oliwa
                     </div>
                 </div>
             </div>
 
             <div class="route-bottom">
-                <span id="routeTimePreview">--:--</span>
+                <span id="routeTimePreview">08:02</span>
+
                 <span id="routeSubtitlePreview">
                     PASS POMOCNICZY
                 </span>
@@ -705,31 +730,35 @@
 
         <div class="preview-area">
 
-            <div class="preview-box">
+            <div class="preview-box icon-preview">
                 <canvas id="iconPreview"></canvas>
+
                 <div class="preview-caption">
                     Ikona
                 </div>
             </div>
 
-            <div class="preview-box">
+            <div class="preview-box logo-preview">
                 <canvas id="logoPreview"></canvas>
+
                 <div class="preview-caption">
                     Logo
                 </div>
             </div>
 
-            <div class="preview-box">
+            <div class="preview-box strip-preview">
                 <canvas id="stripPreview"></canvas>
+
                 <div class="preview-caption">
-                    Strip
+                    Grafika trasy
                 </div>
             </div>
 
-            <div class="preview-box">
+            <div class="preview-box qr-preview">
                 <canvas id="barcodePreview"></canvas>
+
                 <div class="preview-caption">
-                    QR zawierający payload biletu
+                    Pomocniczy QR
                 </div>
             </div>
 
@@ -737,31 +766,29 @@
     </div>
 
     <div class="card">
-        <h2>🔐 Apple Developer</h2>
+        <h2>🔐 Konfiguracja Apple Developer</h2>
 
         <p>
-            W kodzie znajdują się wartości przykładowe:
+            W kodzie odszukaj:
         </p>
 
         <pre>passTypeIdentifier: "pass.com.example.pkp-boarding"
 teamIdentifier: "XXXXXXXXXX"</pre>
 
         <p>
-            Musisz podmienić je na własny Pass Type ID i Team ID.
-            Pass Type ID musi odpowiadać certyfikatowi, którym podpisujesz pass.
+            i zastąp te wartości własnym Pass Type ID oraz Team ID.
         </p>
 
-        <p>
-            Apple Wallet wymaga podpisanego pliku
-            <code>signature</code>. Samo utworzenie
-            <code>manifest.json</code> nie wystarcza. [56]
+        <p class="error">
+            Ten kod tworzy pakiet bez pliku signature.
+            Bez podpisu certyfikatem Apple Wallet może go odrzucić.
         </p>
     </div>
 
+    <!-- PDF.js — tylko do odczytu tekstu z PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
-
+    <!-- JSZip — tylko do utworzenia archiwum .pkpass -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
@@ -771,8 +798,15 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
         let pdfText = "";
+
+        /*
+         * Ten kod nie próbuje skanować obrazu QR.
+         * Tworzy pomocniczy QR payload z danych biletu.
+         */
         let qrPayload = "";
-        let qrFormat = "PKBarcodeFormatQR";
+
+        let qrFormat =
+            "PKBarcodeFormatQR";
 
         const styleMap = {
             red: {
@@ -810,11 +844,11 @@ teamIdentifier: "XXXXXXXXXX"</pre>
         const pdfStatus =
             document.getElementById("pdfStatus");
 
-        const qrSourceBox =
-            document.getElementById("qrSourceBox");
+        const pdfTextBox =
+            document.getElementById("pdfTextBox");
 
-        const qrSourceText =
-            document.getElementById("qrSourceText");
+        const pdfTextOutput =
+            document.getElementById("pdfTextOutput");
 
         const ticketForm =
             document.getElementById("ticketForm");
@@ -841,7 +875,8 @@ teamIdentifier: "XXXXXXXXXX"</pre>
         }
 
         function getValue(id) {
-            const element = document.getElementById(id);
+            const element =
+                document.getElementById(id);
 
             if (!element) {
                 return "";
@@ -863,7 +898,8 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 value !== null &&
                 String(value).trim()
             ) {
-                element.value = String(value).trim();
+                element.value =
+                    String(value).trim();
             }
         }
 
@@ -906,98 +942,100 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 pages.push(pageText);
             }
 
-            return normalizeText(pages.join("\n"));
-        }
-
-        async function scanQrOnPdf(file) {
-            const arrayBuffer =
-                await file.arrayBuffer();
-
-            const pdf =
-                await pdfjsLib.getDocument({
-                    data: new Uint8Array(arrayBuffer)
-                }).promise;
-
-            for (
-                let pageNumber = 1;
-                pageNumber <= pdf.numPages;
-                pageNumber++
-            ) {
-                const page =
-                    await pdf.getPage(pageNumber);
-
-                /*
-                 * Większa skala poprawia odczyt małych kodów.
-                 */
-                const viewport =
-                    page.getViewport({
-                        scale: 4
-                    });
-
-                const canvas =
-                    document.createElement("canvas");
-
-                const context =
-                    canvas.getContext("2d", {
-                        willReadFrequently: true
-                    });
-
-                canvas.width =
-                    Math.ceil(viewport.width);
-
-                canvas.height =
-                    Math.ceil(viewport.height);
-
-                await page.render({
-                    canvasContext: context,
-                    viewport
-                }).promise;
-
-                const imageData =
-                    context.getImageData(
-                        0,
-                        0,
-                        canvas.width,
-                        canvas.height
-                    );
-
-                const code =
-                    jsQR(
-                        imageData.data,
-                        imageData.width,
-                        imageData.height,
-                        {
-                            inversionAttempts: "attemptBoth"
-                        }
-                    );
-
-                if (code && code.data) {
-                    return {
-                        page: pageNumber,
-                        data: code.data
-                    };
-                }
-            }
-
-            return null;
+            return normalizeText(
+                pages.join("\n")
+            );
         }
 
         function parseTicketText(text) {
             const result = {};
 
-            const trainMatch =
-                text.match(
-                    /\b(?:IC|EIC|TLK|EC|EN|D|IR)\s*\d{1,5}\b/i
+            const normalized =
+                text
+                    .replace(/\u00A0/g, " ")
+                    .replace(/[ \t]+/g, " ")
+                    .replace(/\r/g, "\n")
+                    .replace(/\n+/g, "\n")
+                    .trim();
+
+            const passengerMatch =
+                normalized.match(
+                    /([A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+(?:\s+[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)+)\s+to Twój plan podróży/i
                 );
 
-            if (trainMatch) {
-                result.trainNumber =
-                    trainMatch[0].trim();
+            if (passengerMatch) {
+                result.passenger =
+                    passengerMatch[1].trim();
+            }
+
+            const ticketMatch =
+                normalized.match(
+                    /Bilet nr\s+([A-Z]{1,4}\s*\d{5,20})/i
+                );
+
+            if (ticketMatch) {
+                result.ticketNumber =
+                    ticketMatch[1].trim();
+            }
+
+            const referenceMatch =
+                normalized.match(
+                    /Nr referencyjny:\s*([0-9]+)/i
+                );
+
+            if (referenceMatch) {
+                result.referenceNumber =
+                    referenceMatch[1].trim();
+            }
+
+            const emergencyMatch =
+                normalized.match(
+                    /Kod awaryjny:\s*([0-9]+)/i
+                );
+
+            if (emergencyMatch) {
+                result.emergencyCode =
+                    emergencyMatch[1].trim();
+            }
+
+            /*
+             * Dla tego biletu tekst ma postać:
+             * Kraków Gł. -> Gdańsk
+             * Oliwa
+             */
+            const routeMatch =
+                normalized.match(
+                    /([A-ZĄĆĘŁŃÓŚŹŻ][A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż .-]{2,60})\s*->\s*([A-ZĄĆĘŁŃÓŚŹŻ][A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż .-]{2,60})/i
+                );
+
+            if (routeMatch) {
+                result.from =
+                    routeMatch[1].trim();
+
+                result.to =
+                    routeMatch[2].trim();
+            }
+
+            /*
+             * Zwykle pierwsza godzina w tekście jest godziną odjazdu,
+             * ale tutaj rozpoznajemy cały zakres.
+             */
+            const timeMatch =
+                normalized.match(
+                    /\b([01]\d|2[0-3]):([0-5]\d)\s*-\s*([01]\d|2[0-3]):([0-5]\d)\b/
+                );
+
+            if (timeMatch) {
+                result.departureTime =
+                    `${timeMatch[1]}:${timeMatch[2]}`;
+
+                result.arrivalTime =
+                    `${timeMatch[3]}:${timeMatch[4]}`;
             }
 
             const dateMatch =
-                text.match(
-                    /\b(0?[1-9]|[12]\d|3[01])[\s./-](0?[1-9]|1[0-2])[\s./-](20\d{2})\b/
+                normalized.match(
+                    /\b(0?[1-9]|[12]\d|3[01])\.(0?[1-9]|1[0-2])\.(20\d{2})\b/
                 );
 
             if (dateMatch) {
@@ -1014,35 +1052,36 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     `${year}-${month}-${day}`;
             }
 
-            const timeMatch =
-                text.match(
-                    /\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/
+            const trainMatch =
+                normalized.match(
+                    /\b(EIP|EIC|IC|TLK|EC|EN)\s+([0-9]{2,5})\b/i
                 );
 
-            if (timeMatch) {
-                const hour =
-                    timeMatch[1].padStart(2, "0");
+            if (trainMatch) {
+                result.trainCategory =
+                    trainMatch[1].toUpperCase();
 
-                const minute =
-                    timeMatch[2];
-
-                result.departureTime =
-                    `${hour}:${minute}`;
+                result.trainNumber =
+                    `${trainMatch[1].toUpperCase()} ${trainMatch[2]}`;
             }
 
-            const seatMatch =
-                text.match(
-                    /(?:miejsce|seat|siedzenie)\s*[:.]?\s*([0-9]{1,3}[A-H]?)/i
+            const classMatch =
+                normalized.match(
+                    /(?:kl\.|klasa)\s*([1-2])/i
                 );
 
-            if (seatMatch) {
-                result.seat =
-                    seatMatch[1];
+            if (classMatch) {
+                result.travelClass =
+                    classMatch[1];
             }
 
+            /*
+             * Dla tego biletu w tekście występuje:
+             * 4 Wagon
+             */
             const coachMatch =
-                text.match(
-                    /(?:wagon|coach)\s*[:.]?\s*([0-9]{1,2})/i
+                normalized.match(
+                    /\b([0-9]{1,2})\s+Wagon\b/i
                 );
 
             if (coachMatch) {
@@ -1050,24 +1089,28 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     coachMatch[1];
             }
 
-            const passengerMatch =
-                text.match(
-                    /(?:pasażer|passenger|podróżny|nazwisko)\s*[:.]?\s*([A-ZĄĆĘŁŃÓŚŹŻ][^,\n]{2,80})/i
+            /*
+             * Dla tego biletu występuje:
+             * Wagon bezprzedziałowy 44 środek
+             */
+            const seatMatch =
+                normalized.match(
+                    /Wagon\s+bezprzedziałowy\s+([0-9]{1,3})\b/i
                 );
 
-            if (passengerMatch) {
-                result.passenger =
-                    passengerMatch[1].trim();
+            if (seatMatch) {
+                result.seat =
+                    seatMatch[1];
             }
 
-            const ticketMatch =
-                text.match(
-                    /(?:numer biletu|nr biletu|ticket number|ticket no\.?)\s*[:.]?\s*([A-Z0-9/-]{5,30})/i
+            const priceMatch =
+                normalized.match(
+                    /Razem\s+w tym VAT\s+([0-9]+[.,][0-9]{2})zł/i
                 );
 
-            if (ticketMatch) {
-                result.ticketNumber =
-                    ticketMatch[1].trim();
+            if (priceMatch) {
+                result.price =
+                    priceMatch[1].replace(",", ".");
             }
 
             return result;
@@ -1077,40 +1120,103 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             const parsed =
                 parseTicketText(text);
 
-            Object.entries(parsed).forEach(
-                ([key, value]) => {
-                    setField(key, value);
-                }
+            setField(
+                "passenger",
+                parsed.passenger
             );
 
-            if (parsed.trainNumber) {
-                const categoryMatch =
-                    parsed.trainNumber.match(
-                        /^(IC|EIC|TLK|EC|EN|D|IR)/i
-                    );
+            setField(
+                "ticketNumber",
+                parsed.ticketNumber
+            );
 
-                if (categoryMatch) {
-                    const category =
-                        categoryMatch[1].toUpperCase();
+            setField(
+                "referenceNumber",
+                parsed.referenceNumber
+            );
 
-                    const select =
-                        document.getElementById(
-                            "trainCategory"
-                        );
+            setField(
+                "emergencyCode",
+                parsed.emergencyCode
+            );
 
-                    const exists =
-                        [...select.options].some(
-                            option =>
-                                option.value === category
-                        );
+            setField(
+                "trainNumber",
+                parsed.trainNumber
+            );
 
-                    if (exists) {
-                        select.value = category;
-                    }
-                }
+            setField(
+                "date",
+                parsed.date
+            );
+
+            setField(
+                "departureTime",
+                parsed.departureTime
+            );
+
+            setField(
+                "from",
+                parsed.from
+            );
+
+            setField(
+                "to",
+                parsed.to
+            );
+
+            setField(
+                "seat",
+                parsed.seat
+            );
+
+            setField(
+                "coach",
+                parsed.coach
+            );
+
+            const category =
+                document.getElementById(
+                    "trainCategory"
+                );
+
+            if (
+                parsed.trainCategory &&
+                [...category.options].some(
+                    option =>
+                        option.value ===
+                        parsed.trainCategory
+                )
+            ) {
+                category.value =
+                    parsed.trainCategory;
             }
 
             renderAll();
+        }
+
+        function createFallbackBarcodeMessage() {
+            const values = [
+                "PKP-HELPER",
+                getValue("ticketNumber"),
+                getValue("referenceNumber"),
+                getValue("emergencyCode"),
+                getValue("trainNumber"),
+                getValue("date"),
+                getValue("departureTime"),
+                getValue("from"),
+                getValue("to"),
+                getValue("coach"),
+                getValue("seat")
+            ];
+
+            return values
+                .map(value =>
+                    String(value || "")
+                        .replace(/\|/g, " ")
+                        .trim()
+                )
+                .join("|");
         }
 
         pdfInput.addEventListener(
@@ -1123,68 +1229,47 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     return;
                 }
 
-                qrPayload = "";
-                qrSourceBox.style.display = "none";
                 pdfStatus.innerHTML =
-                    "⏳ Odczytywanie tekstu i kodu QR...";
+                    "⏳ Odczytywanie tekstu z PDF...";
 
                 try {
                     pdfText =
                         await extractTextFromPdf(file);
 
-                    const qr =
-                        await scanQrOnPdf(file);
-
-                    if (qr) {
-                        qrPayload =
-                            qr.data;
-
-                        qrFormat =
-                            "PKBarcodeFormatQR";
-
-                        qrSourceText.textContent =
-                            qrPayload;
-
-                        qrSourceBox.style.display =
-                            "block";
-
-                        pdfStatus.innerHTML = `
-                            <p class="success">
-                                ✅ Odczytano tekst PDF i kod QR.
-                            </p>
-
-                            <p>
-                                QR znaleziono na stronie
-                                ${qr.page}.
-                            </p>
-
-                            <details>
-                                <summary>
-                                    Pokaż tekst PDF
-                                </summary>
-                                <pre>${escapeHtml(pdfText)}</pre>
-                            </details>
-                        `;
-                    } else {
-                        pdfStatus.innerHTML = `
-                            <p class="success">
-                                ✅ Odczytano tekst PDF.
-                            </p>
-
-                            <p class="error">
-                                ⚠️ Nie znaleziono kodu QR.
-                            </p>
-
-                            <details>
-                                <summary>
-                                    Pokaż tekst PDF
-                                </summary>
-                                <pre>${escapeHtml(pdfText)}</pre>
-                            </details>
-                        `;
+                    if (!pdfText.trim()) {
+                        throw new Error(
+                            "PDF nie zawiera możliwego do odczytania tekstu."
+                        );
                     }
 
+                    pdfTextOutput.textContent =
+                        pdfText;
+
+                    pdfTextBox.style.display =
+                        "block";
+
                     fillFormFromPdf(pdfText);
+
+                    qrPayload =
+                        createFallbackBarcodeMessage();
+
+                    pdfStatus.innerHTML = `
+                        <p class="success">
+                            ✅ PDF odczytany poprawnie.
+                        </p>
+
+                        <p>
+                            Dane biletu zostały automatycznie
+                            uzupełnione w formularzu.
+                        </p>
+
+                        <p class="muted small">
+                            Nie skanuję obrazu QR z dokumentu.
+                            Tworzę pomocniczy QR z danych tekstowych biletu.
+                        </p>
+                    `;
+
+                    renderAll();
 
                 } catch (error) {
                     console.error(error);
@@ -1205,12 +1290,15 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     "graphicStyle"
                 ).value;
 
-            return styleMap[style] || styleMap.red;
+            return styleMap[style] ||
+                styleMap.red;
         }
 
         function formatPolishDate(dateString) {
             const date =
-                new Date(`${dateString}T00:00:00`);
+                new Date(
+                    `${dateString}T00:00:00`
+                );
 
             if (Number.isNaN(date.getTime())) {
                 return dateString;
@@ -1235,8 +1323,15 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             radius
         ) {
             context.beginPath();
-            context.moveTo(x + radius, y);
-            context.lineTo(x + width - radius, y);
+            context.moveTo(
+                x + radius,
+                y
+            );
+
+            context.lineTo(
+                x + width - radius,
+                y
+            );
 
             context.quadraticCurveTo(
                 x + width,
@@ -1257,7 +1352,10 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 y + height
             );
 
-            context.lineTo(x + radius, y + height);
+            context.lineTo(
+                x + radius,
+                y + height
+            );
 
             context.quadraticCurveTo(
                 x,
@@ -1266,7 +1364,10 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 y + height - radius
             );
 
-            context.lineTo(x, y + radius);
+            context.lineTo(
+                x,
+                y + radius
+            );
 
             context.quadraticCurveTo(
                 x,
@@ -1290,7 +1391,8 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             context.translate(x, y);
             context.scale(scale, scale);
 
-            context.fillStyle = color;
+            context.fillStyle =
+                color;
 
             roundedRect(
                 context,
@@ -1303,7 +1405,8 @@ teamIdentifier: "XXXXXXXXXX"</pre>
 
             context.fill();
 
-            context.fillStyle = "#FFFFFF";
+            context.fillStyle =
+                "#FFFFFF";
 
             roundedRect(
                 context,
@@ -1327,9 +1430,11 @@ teamIdentifier: "XXXXXXXXXX"</pre>
 
             context.fill();
 
-            context.fillStyle = color;
+            context.fillStyle =
+                color;
 
             context.beginPath();
+
             context.arc(
                 24,
                 78,
@@ -1337,9 +1442,11 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 0,
                 Math.PI * 2
             );
+
             context.fill();
 
             context.beginPath();
+
             context.arc(
                 76,
                 78,
@@ -1347,15 +1454,26 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 0,
                 Math.PI * 2
             );
+
             context.fill();
 
-            context.fillStyle = "#FFFFFF";
-            context.fillRect(100, 30, 12, 8);
+            context.fillStyle =
+                "#FFFFFF";
+
+            context.fillRect(
+                100,
+                30,
+                12,
+                8
+            );
 
             context.restore();
         }
 
-        function drawIcon(canvas, scale) {
+        function drawIcon(
+            canvas,
+            scale
+        ) {
             const size =
                 58 * scale;
 
@@ -1418,7 +1536,10 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             );
         }
 
-        function drawLogo(canvas, scale) {
+        function drawLogo(
+            canvas,
+            scale
+        ) {
             const width =
                 320 * scale;
 
@@ -1499,7 +1620,10 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             );
         }
 
-        function drawStrip(canvas, scale) {
+        function drawStrip(
+            canvas,
+            scale
+        ) {
             const width =
                 750 * scale;
 
@@ -1559,7 +1683,11 @@ teamIdentifier: "XXXXXXXXXX"</pre>
 
                 context.beginPath();
 
-                context.moveTo(x, 0);
+                context.moveTo(
+                    x,
+                    0
+                );
+
                 context.lineTo(
                     x + height * 0.55,
                     0
@@ -1592,26 +1720,26 @@ teamIdentifier: "XXXXXXXXXX"</pre>
 
             const train =
                 getValue("trainNumber") ||
-                "IC 0000";
+                "EIP 3508";
 
             const from =
                 getValue("from") ||
-                "STACJA A";
+                "Kraków Gł.";
 
             const to =
                 getValue("to") ||
-                "STACJA B";
+                "Gdańsk Oliwa";
 
             const date =
                 getValue("date")
                     ? formatPolishDate(
                         getValue("date")
                     )
-                    : "DATA";
+                    : "18.09.2026";
 
             const time =
                 getValue("departureTime") ||
-                "--:--";
+                "08:02";
 
             context.fillStyle =
                 palette.text;
@@ -1680,7 +1808,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
 
         function drawQrPlaceholder(
             canvas,
-            text
+            payload
         ) {
             const size =
                 320;
@@ -1704,6 +1832,19 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 size
             );
 
+            context.strokeStyle =
+                "#222222";
+
+            context.lineWidth =
+                8;
+
+            context.strokeRect(
+                18,
+                18,
+                size - 36,
+                size - 36
+            );
+
             context.fillStyle =
                 "#222222";
 
@@ -1714,23 +1855,23 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 "middle";
 
             context.font =
-                "bold 18px Arial";
+                "bold 22px Arial";
 
             context.fillText(
-                text
-                    ? "QR DANE ODCZYTANE"
-                    : "BRAK QR",
+                payload
+                    ? "QR PASS"
+                    : "BRAK DANYCH",
                 size / 2,
-                size / 2 - 15
+                size / 2 - 18
             );
 
             context.font =
                 "14px Arial";
 
             context.fillText(
-                text
-                    ? "Payload zostanie zapisany w pass.json"
-                    : "Wczytaj PDF z kodem QR",
+                payload
+                    ? "Payload zapisany w pass.json"
+                    : "Wczytaj bilet PDF",
                 size / 2,
                 size / 2 + 20
             );
@@ -1756,7 +1897,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 "routeTrainPreview"
             ).textContent =
                 getValue("trainNumber") ||
-                "IC 0000";
+                "EIP 3508";
 
             document.getElementById(
                 "routeDatePreview"
@@ -1765,25 +1906,25 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     ? formatPolishDate(
                         getValue("date")
                     )
-                    : "DATA";
+                    : "18.09.2026";
 
             document.getElementById(
                 "routeFromPreview"
             ).textContent =
                 getValue("from") ||
-                "STACJA A";
+                "Kraków Gł.";
 
             document.getElementById(
                 "routeToPreview"
             ).textContent =
                 getValue("to") ||
-                "STACJA B";
+                "Gdańsk Oliwa";
 
             document.getElementById(
                 "routeTimePreview"
             ).textContent =
                 getValue("departureTime") ||
-                "--:--";
+                "08:02";
 
             document.getElementById(
                 "routeSubtitlePreview"
@@ -1796,22 +1937,30 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             renderRoutePreview();
 
             drawIcon(
-                document.getElementById("iconPreview"),
+                document.getElementById(
+                    "iconPreview"
+                ),
                 2
             );
 
             drawLogo(
-                document.getElementById("logoPreview"),
+                document.getElementById(
+                    "logoPreview"
+                ),
                 2
             );
 
             drawStrip(
-                document.getElementById("stripPreview"),
+                document.getElementById(
+                    "stripPreview"
+                ),
                 2
             );
 
             drawQrPlaceholder(
-                document.getElementById("barcodePreview"),
+                document.getElementById(
+                    "barcodePreview"
+                ),
                 qrPayload
             );
         }
@@ -1827,12 +1976,16 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             "graphicStyle",
             "customSubtitle"
         ].forEach(id => {
-            document.getElementById(id).addEventListener(
+            document.getElementById(
+                id
+            ).addEventListener(
                 "input",
                 renderAll
             );
 
-            document.getElementById(id).addEventListener(
+            document.getElementById(
+                id
+            ).addEventListener(
                 "change",
                 renderAll
             );
@@ -1843,34 +1996,19 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             renderAll
         );
 
-        function toIsoLocalDateTime(
-            dateString,
-            timeString
-        ) {
-            const date =
-                new Date(
-                    `${dateString}T${timeString}:00`
-                );
-
-            if (Number.isNaN(date.getTime())) {
-                throw new Error(
-                    "Nieprawidłowa data lub godzina."
-                );
-            }
-
-            return date.toISOString();
-        }
-
         async function canvasToPngBytes(
             drawFunction,
-            width,
-            height,
             scale
         ) {
             const canvas =
-                document.createElement("canvas");
+                document.createElement(
+                    "canvas"
+                );
 
-            drawFunction(canvas, scale);
+            drawFunction(
+                canvas,
+                scale
+            );
 
             const blob =
                 await new Promise(resolve => {
@@ -1882,7 +2020,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
 
             if (!blob) {
                 throw new Error(
-                    "Nie udało się utworzyć grafiki PNG."
+                    "Nie udało się utworzyć obrazu PNG."
                 );
             }
 
@@ -1895,72 +2033,54 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             files["icon.png"] =
                 await canvasToPngBytes(
                     drawIcon,
-                    58,
-                    58,
                     1
                 );
 
             files["icon@2x.png"] =
                 await canvasToPngBytes(
                     drawIcon,
-                    116,
-                    116,
                     2
                 );
 
             files["icon@3x.png"] =
                 await canvasToPngBytes(
                     drawIcon,
-                    174,
-                    174,
                     3
                 );
 
             files["logo.png"] =
                 await canvasToPngBytes(
                     drawLogo,
-                    320,
-                    100,
                     1
                 );
 
             files["logo@2x.png"] =
                 await canvasToPngBytes(
                     drawLogo,
-                    640,
-                    200,
                     2
                 );
 
             files["logo@3x.png"] =
                 await canvasToPngBytes(
                     drawLogo,
-                    960,
-                    300,
                     3
                 );
 
             files["strip.png"] =
                 await canvasToPngBytes(
                     drawStrip,
-                    750,
-                    246,
                     1
                 );
 
             files["strip@2x.png"] =
                 await canvasToPngBytes(
                     drawStrip,
-                    1500,
-                    492,
                     2
                 );
 
             files["strip@3x.png"] =
                 await canvasToPngBytes(
                     drawStrip,
-                    2250,
-                    738,
                     3
                 );
 
@@ -2017,6 +2137,12 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             const ticketNumber =
                 getValue("ticketNumber");
 
+            const referenceNumber =
+                getValue("referenceNumber");
+
+            const emergencyCode =
+                getValue("emergencyCode");
+
             const trainCategory =
                 getValue("trainCategory");
 
@@ -2026,25 +2152,9 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     departureTime
                 );
 
-            const includeDisclaimer =
-                document.getElementById(
-                    "includeDisclaimer"
-                ).checked;
-
-            const fallbackBarcode =
-                [
-                    trainNumber,
-                    date,
-                    departureTime,
-                    from,
-                    to,
-                    coach,
-                    seat,
-                    ticketNumber
-                ].join("|");
-
             const barcodeMessage =
-                qrPayload || fallbackBarcode;
+                qrPayload ||
+                createFallbackBarcodeMessage();
 
             const backFields = [
                 {
@@ -2060,7 +2170,19 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 },
 
                 {
-                    key: "trainCategory",
+                    key: "referenceNumber",
+                    label: "Numer referencyjny",
+                    value: referenceNumber || "—"
+                },
+
+                {
+                    key: "emergencyCode",
+                    label: "Kod awaryjny",
+                    value: emergencyCode || "—"
+                },
+
+                {
+                    key: "category",
                     label: "Rodzaj pociągu",
                     value: trainCategory || "—"
                 },
@@ -2068,13 +2190,16 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 {
                     key: "barcodeSource",
                     label: "Źródło kodu",
-                    value: qrPayload
-                        ? "Kod odczytany z PDF"
-                        : "Kod utworzony z formularza"
+                    value:
+                        "Pomocniczy kod utworzony z danych PDF"
                 }
             ];
 
-            if (includeDisclaimer) {
+            if (
+                document.getElementById(
+                    "includeDisclaimer"
+                ).checked
+            ) {
                 backFields.push({
                     key: "disclaimer",
                     label: "Informacja",
@@ -2087,7 +2212,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 formatVersion: 1,
 
                 /*
-                 * ZMIEŃ TE DWA POLA.
+                 * Zmień na własne dane Apple Developer.
                  */
                 passTypeIdentifier:
                     "pass.com.example.pkp-boarding",
@@ -2142,7 +2267,9 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                             key: "date",
                             label: "Data",
                             value:
-                                formatPolishDate(date)
+                                formatPolishDate(
+                                    date
+                                )
                         },
 
                         {
@@ -2170,9 +2297,14 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 },
 
                 barcode: {
-                    format: qrFormat,
-                    message: barcodeMessage,
-                    messageEncoding: "utf-8"
+                    format:
+                        "PKBarcodeFormatQR",
+
+                    message:
+                        barcodeMessage,
+
+                    messageEncoding:
+                        "utf-8"
                 },
 
                 backgroundColor:
@@ -2187,6 +2319,11 @@ teamIdentifier: "XXXXXXXXXX"</pre>
         }
 
         async function generatePkpass() {
+            qrPayload =
+                createFallbackBarcodeMessage();
+
+            renderAll();
+
             const passJson =
                 createPassJson();
 
@@ -2248,34 +2385,34 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 );
             }
 
-            /*
-             * Nie ma signature, ponieważ przeglądarka
-             * nie ma certyfikatu Apple Developer.
-             */
             const blob =
                 await zip.generateAsync({
                     type: "blob",
                     mimeType:
                         "application/vnd.apple.pkpass",
 
-                    compression: "DEFLATE",
+                    compression:
+                        "DEFLATE",
 
                     compressionOptions: {
                         level: 6
                     }
                 });
 
-            const safeTrainNumber =
+            const trainName =
                 getValue("trainNumber")
                     .replace(
                         /[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ-]+/g,
                         "-"
                     )
-                    .replace(/-+/g, "-")
+                    .replace(
+                        /-+/g,
+                        "-"
+                    )
                     .toLowerCase();
 
             const filename =
-                `pkp-${safeTrainNumber || "pass"}.pkpass`;
+                `pkp-${trainName || "pass"}.pkpass`;
 
             const url =
                 URL.createObjectURL(blob);
@@ -2289,11 +2426,11 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             link.download =
                 filename;
 
-            link.textContent =
-                `⬇️ Pobierz ${filename}`;
-
             link.className =
                 "download-link";
+
+            link.textContent =
+                `⬇️ Pobierz ${filename}`;
 
             generationStatus.innerHTML =
                 "";
@@ -2302,38 +2439,38 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 link
             );
 
-            const note =
+            const information =
                 document.createElement("p");
 
-            note.className =
+            information.className =
                 "small muted";
 
-            note.textContent =
-                qrPayload
-                    ? "Do passa wpisano payload odczytany z oryginalnego QR."
-                    : "Nie znaleziono QR — użyto danych z formularza.";
+            information.textContent =
+                "Do QR wpisano pomocniczy payload utworzony z danych odczytanych z PDF.";
 
             generationStatus.appendChild(
-                note
+                information
             );
 
-            const signatureNote =
+            const warning =
                 document.createElement("p");
 
-            signatureNote.className =
-                "error small";
+            warning.className =
+                "small error";
 
-            signatureNote.textContent =
-                "Uwaga: plik nie zawiera signature i może nie zostać dodany do Apple Wallet.";
+            warning.textContent =
+                "Plik nie zawiera signature Apple Developer, dlatego Wallet może go odrzucić.";
 
             generationStatus.appendChild(
-                signatureNote
+                warning
             );
 
             link.click();
 
             setTimeout(
-                () => URL.revokeObjectURL(url),
+                () => {
+                    URL.revokeObjectURL(url);
+                },
                 60000
             );
         }
@@ -2366,7 +2503,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                         id => !getValue(id)
                     );
 
-                if (missing.length) {
+                if (missing.length > 0) {
                     formError.textContent =
                         "⚠️ Uzupełnij wszystkie pola oznaczone gwiazdką.";
 
@@ -2380,7 +2517,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     true;
 
                 generateButton.textContent =
-                    "⏳ Tworzenie passa...";
+                    "⏳ Tworzenie pliku .pkpass...";
 
                 try {
                     await generatePkpass();
