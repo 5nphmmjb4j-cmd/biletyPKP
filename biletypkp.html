@@ -385,15 +385,6 @@
             color: var(--muted);
             font-size: 12px;
         }
-
-        .qr-source {
-            margin-top: 14px;
-            padding: 12px;
-
-            border: 1px dashed #C7C7CC;
-            border-radius: 8px;
-            background: #FAFAFC;
-        }
     </style>
 </head>
 
@@ -413,8 +404,8 @@
 
     <div class="info">
         <strong>Odczyt PDF:</strong>
-        ten kod nie korzysta z jsQR. Odczytuje tekst bezpośrednio z PDF,
-        co jest właściwe dla przesłanego biletu tekstowego.
+        ten kod odczytuje tekst bezpośrednio z PDF i nie używa biblioteki jsQR.
+        Dzięki temu nie wystąpi błąd <code>jsQR is not defined</code>.
     </div>
 
     <div class="card">
@@ -758,7 +749,7 @@
                 <canvas id="barcodePreview"></canvas>
 
                 <div class="preview-caption">
-                    Pomocniczy QR
+                    Pomocniczy kod QR
                 </div>
             </div>
 
@@ -776,19 +767,19 @@
 teamIdentifier: "XXXXXXXXXX"</pre>
 
         <p>
-            i zastąp te wartości własnym Pass Type ID oraz Team ID.
+            Zastąp te wartości własnym Pass Type ID oraz Team ID.
         </p>
 
         <p class="error">
             Ten kod tworzy pakiet bez pliku signature.
-            Bez podpisu certyfikatem Apple Wallet może go odrzucić.
+            Bez podpisu Apple Wallet może go odrzucić.
         </p>
     </div>
 
-    <!-- PDF.js — tylko do odczytu tekstu z PDF -->
+    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-    <!-- JSZip — tylko do utworzenia archiwum .pkpass -->
+    <!-- JSZip -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
@@ -798,15 +789,8 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
         let pdfText = "";
-
-        /*
-         * Ten kod nie próbuje skanować obrazu QR.
-         * Tworzy pomocniczy QR payload z danych biletu.
-         */
         let qrPayload = "";
-
-        let qrFormat =
-            "PKBarcodeFormatQR";
+        let qrFormat = "PKBarcodeFormatQR";
 
         const styleMap = {
             red: {
@@ -999,7 +983,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             }
 
             /*
-             * Dla tego biletu tekst ma postać:
+             * W PDF występuje:
              * Kraków Gł. -> Gdańsk
              * Oliwa
              */
@@ -1016,10 +1000,6 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     routeMatch[2].trim();
             }
 
-            /*
-             * Zwykle pierwsza godzina w tekście jest godziną odjazdu,
-             * ale tutaj rozpoznajemy cały zakres.
-             */
             const timeMatch =
                 normalized.match(
                     /\b([01]\d|2[0-3]):([0-5]\d)\s*-\s*([01]\d|2[0-3]):([0-5]\d)\b/
@@ -1075,10 +1055,6 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     classMatch[1];
             }
 
-            /*
-             * Dla tego biletu w tekście występuje:
-             * 4 Wagon
-             */
             const coachMatch =
                 normalized.match(
                     /\b([0-9]{1,2})\s+Wagon\b/i
@@ -1089,10 +1065,6 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                     coachMatch[1];
             }
 
-            /*
-             * Dla tego biletu występuje:
-             * Wagon bezprzedziałowy 44 środek
-             */
             const seatMatch =
                 normalized.match(
                     /Wagon\s+bezprzedziałowy\s+([0-9]{1,3})\b/i
@@ -1264,8 +1236,8 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                         </p>
 
                         <p class="muted small">
-                            Nie skanuję obrazu QR z dokumentu.
-                            Tworzę pomocniczy QR z danych tekstowych biletu.
+                            Utworzono pomocniczy payload QR
+                            z danych tekstowych biletu.
                         </p>
                     `;
 
@@ -1314,6 +1286,34 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             );
         }
 
+        /*
+         * Ta funkcja była brakującym elementem.
+         * Tworzy prawidłową datę ISO dla pass.json.
+         */
+        function toIsoLocalDateTime(
+            dateString,
+            timeString
+        ) {
+            if (!dateString || !timeString) {
+                throw new Error(
+                    "Brakuje daty albo godziny odjazdu."
+                );
+            }
+
+            const date =
+                new Date(
+                    `${dateString}T${timeString}:00`
+                );
+
+            if (Number.isNaN(date.getTime())) {
+                throw new Error(
+                    "Nieprawidłowa data lub godzina."
+                );
+            }
+
+            return date.toISOString();
+        }
+
         function roundedRect(
             context,
             x,
@@ -1323,6 +1323,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
             radius
         ) {
             context.beginPath();
+
             context.moveTo(
                 x + radius,
                 y
@@ -1388,8 +1389,15 @@ teamIdentifier: "XXXXXXXXXX"</pre>
         ) {
             context.save();
 
-            context.translate(x, y);
-            context.scale(scale, scale);
+            context.translate(
+                x,
+                y
+            );
+
+            context.scale(
+                scale,
+                scale
+            );
 
             context.fillStyle =
                 color;
@@ -1704,6 +1712,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 );
 
                 context.closePath();
+
                 context.fill();
             }
 
@@ -2298,7 +2307,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
 
                 barcode: {
                     format:
-                        "PKBarcodeFormatQR",
+                        qrFormat,
 
                     message:
                         barcodeMessage,
@@ -2446,7 +2455,7 @@ teamIdentifier: "XXXXXXXXXX"</pre>
                 "small muted";
 
             information.textContent =
-                "Do QR wpisano pomocniczy payload utworzony z danych odczytanych z PDF.";
+                "Do QR wpisano pomocniczy payload utworzony z danych biletu.";
 
             generationStatus.appendChild(
                 information
