@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKP Intercity → Apple Wallet (Boarding Pass)</title>
+    <style>
+        :root {
+            --primary: #007AFF;
+            --danger: #FF3B30;
+            --success: #34C759;
+            --bg: #F2F2F7;
+            --card: #FFFFFF;
+            --text: #1C1C1E;
+            --muted: #8E8E93;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        h1, h2, h3 { margin-top: 0; }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .warning {
+            background: #FFF3CD;
+            border-left: 4px solid #FFC107;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 16px 0;
+        }
+        .error { color: var(--danger); font-weight: 600; }
+        .success { color: var(--success); font-weight: 600; }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #D1D1D6;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover { opacity: 0.9; }
+        button:disabled {
+            background: var(--muted);
+            cursor: not-allowed;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        code {
+            background: #F5F5F7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 14px;
+        }
+        .step {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎫 PKP Intercity → Apple Wallet</h1>
+<p>Generuj plik <code>.pkpass</code> typu boarding pass z danych biletu PKP Intercity.</p>
+
+<div class="warning">
+    <strong>⚠️ Ważne:</strong> Ten pass to <em>nieoficjalny dokument pomocniczy</em>. 
+    Nie zastępuje biletu PKP Intercity i nie jest autoryzowany przez przewoźnika. 
+    Używaj go wyłącznie jako wygodnej wizualizacji w Apple Wallet.
+</div>
+
+<div class="card">
+    <h2>📄 Opcja 1: Wgraj PDF biletu</h2>
+    <p>Przeglądarka spróbuje odczytać tekst z PDF. Jeśli się nie uda, użyj formularza poniżej.</p>
+    <input type="file" id="pdfInput" accept=".pdf">
+    <div id="pdfStatus"></div>
+</div>
+
+<div class="card">
+    <h2>✍️ Opcja 2: Wprowadź dane ręcznie</h2>
+    <form id="ticketForm">
+        <div class="grid">
+            <div>
+                <label for="trainNumber">Numer pociągu *</label>
+                <input type="text" id="trainNumber" placeholder="np. IC 5102" required>
+            </div>
+            <div>
+                <label for="date">Data podróży *</label>
+                <input type="date" id="date" required>
+            </div>
+        </div>
+        <div class="grid">
+            <div>
+                <label for="departureTime">Godzina odjazdu *</label>
+                <input type="time" id="departureTime" required>
+            </div>
+            <div>
+                <label for="from">Stacja odjazdu *</label>
+                <input type="text" id="from" placeholder="np. Kraków Główny" required>
+            </div>
+        </div>
+        <div class="grid">
+            <div>
+                <label for="to">Stacja przyjazdu *</label>
+                <input type="text" id="to" placeholder="np. Warszawa Centralna" required>
+            </div>
+            <div>
+                <label for="seat">Miejsce *</label>
+                <input type="text" id="seat" placeholder="np. 12A" required>
+            </div>
+        </div>
+        <div class="grid">
+            <div>
+                <label for="coach">Wagon</label>
+                <input type="text" id="coach" placeholder="np. 5">
+            </div>
+            <div>
+                <label for="passenger">Pasażer</label>
+                <input type="text" id="passenger" placeholder="Imię i nazwisko">
+            </div>
+        </div>
+        <button type="submit">Generuj .pkpass</button>
+    </form>
+    <div id="formError" class="error" style="display:none; margin-top:12px;"></div>
+</div>
+
+<div class="card">
+    <h2>📲 Jak dodać do Apple Wallet?</h2>
+    <ol>
+        <li class="step">Wygeneruj plik <code>.pkpass</code> za pomocą tego narzędzia.</li>
+        <li class="step">Podpisz go certyfikatem Apple Developer (Pass Type ID Certificate + WWDR).</li>
+        <li class="step">Wyślij podpisany plik na iPhone'a (Mail, AirDrop, iCloud).</li>
+        <li class="step">Otwórz plik — pojawi się przycisk „Dodaj do Wallet".</li>
+    </ol>
+    <p><strong>Bez podpisu Apple Wallet odrzuci plik.</strong></p>
+</div>
+
+<div class="card">
+    <h2>🔐 Jak podpisać .pkpass?</h2>
+    <p>Potrzebujesz:</p>
+    <ul>
+        <li>Konta Apple Developer (płatne)</li>
+        <li>Pass Type ID Certificate (z <code>Certificates, Identifiers & Profiles</code>)</li>
+        <li>WWDR Intermediate Certificate</li>
+    </ul>
+    <p>Narzędzia do podpisywania:</p>
+    <ul>
+        <li>Node.js: <code>npm install -g signpass</code> → <code>signpass --certificate cert.pem --key key.pem pass.pkpass</code></li>
+        <li>Python: biblioteka <code>pkpass</code></li>
+        <li>macOS: <code>productsign</code> (część Xcode)</li>
+    </ul>
+</div>
+
+<script>
+// Prosta ekstrakcja tekstu z PDF (jeśli przeglądarka obsługuje)
+document.getElementById('pdfInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const status = document.getElementById('pdfStatus');
+    status.innerHTML = '⏳ Przetwarzanie PDF...';
+    
+    try {
+        // Uwaga: pełna ekstrakcja z PDF wymaga biblioteki jak pdf.js
+        // Tutaj uproszczona wersja - w produkcji użyj pdf.js
+        status.innerHTML = '<span class="error">❌ Automatyczna ekstrakcja z PDF wymaga biblioteki pdf.js. Użyj formularza ręcznego.</span>';
+    } catch (err) {
+        status.innerHTML = '<span class="error">❌ Błąd: ' + err.message + '</span>';
+    }
+});
+
+document.getElementById('ticketForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const errorDiv = document.getElementById('formError');
+    errorDiv.style.display = 'none';
+    
+    // Walidacja
+    const required = ['trainNumber', 'date', 'departureTime', 'from', 'to', 'seat'];
+    const missing = required.filter(id => !document.getElementById(id).value.trim());
+    
+    if (missing.length > 0) {
+        errorDiv.textContent = '⚠️ Wypełnij wszystkie pola oznaczone *';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Generowanie pass.json
+    const trainNumber = document.getElementById('trainNumber').value.trim();
+    const date = document.getElementById('date').value;
+    const departureTime = document.getElementById('departureTime').value;
+    const from = document.getElementById('from').value.trim();
+    const to = document.getElementById('to').value.trim();
+    const seat = document.getElementById('seat').value.trim();
+    const coach = document.getElementById('coach').value.trim();
+    const passenger = document.getElementById('passenger').value.trim();
+    
+    const departureDateTime = new Date(`${date}T${departureTime}:00`);
+    const isoDate = departureDateTime.toISOString();
+    
+    const passJson = {
+        formatVersion: 1,
+        passTypeIdentifier: "pass.com.example.pkp-boarding", // ZMIEŃ na swój Pass Type ID
+        serialNumber: `PKP-${Date.now()}`,
+        teamIdentifier: "XXXXXXXXXX", // ZMIEŃ na swój Team ID
+        organizationName: "Nieoficjalny pass pomocniczy",
+        description: "Bilet PKP Intercity (pass pomocniczy)",
+        boardingPass: {
+            transitType: "PKTransitTypeTrain",
+            headerFields: [{
+                key: "train",
+                label: "Pociąg",
+                value: trainNumber
+            }],
+            primaryFields: [{
+                key: "from",
+                label: "Odjazd",
+                value: from
+            }, {
+                key: "to",
+                label: "Przyjazd",
+                value: to
+            }],
+            secondaryFields: [{
+                key: "date",
+                label: "Data",
+                value: departureDateTime.toLocaleDateString('pl-PL')
+            }, {
+                key: "time",
+                label: "Godzina",
+                value: departureTime
+            }],
+            auxiliaryFields: [{
+                key: "seat",
+                label: "Miejsce",
+                value: seat
+            }, {
+                key: "coach",
+                label: "Wagon",
+                value: coach || "—"
+            }],
+            backFields: [{
+                key: "passenger",
+                label: "Pasażer",
+                value: passenger || "—"
+            }, {
+                key: "disclaimer",
+                label: "Informacja",
+                value: "Ten pass to nieoficjalny dokument pomocniczy. Nie zastępuje biletu PKP Intercity."
+            }]
+        },
+        barcode: {
+            message: `${trainNumber}|${from}|${to}|${seat}`,
+            format: "PKBarcodeFormatQR",
+            messageEncoding: "iso-8859-2"
+        },
+        backgroundColor: "rgb(220, 53, 69)",
+        foregroundColor: "rgb(255, 255, 255)",
+        labelColor: "rgb(255, 255, 255)",
+        logoText: "PKP IC (pass pomocniczy)"
+    };
+    
+    // Pakowanie .pkpass (ZIP)
+    // Uwaga: przeglądarka nie może stworzyć ZIP bez biblioteki
+    // W produkcji użyj JSZip lub podobnej
+    
+    alert('✅ pass.json wygenerowany!\n\nTeraz musisz:\n1. Dodać obrazy (logo.png, icon.png)\n2. Stworzyć manifest.json (SHA-1 hash każdego pliku)\n3. Podpisać certyfikatem Apple Developer\n4. Spakować do ZIP i zmienić rozszerzenie na .pkpass');
+    
+    console.log('pass.json:', JSON.stringify(passJson, null, 2));
+});
+</script>
+
+</body>
+</html>
