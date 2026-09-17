@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Przekierowanie...</title>
+    <script>
+        window.location.href = 'biletypkp.html';
+    </script>
+</head>
+<body>
+    <p>Przekierowuję do <a href="biletypkp.html">biletypkp.html</a>...</p>
+    <script>
+        // Fallback dla przypadków gdy JS jest wyłączony
+        setTimeout(function() {
+            window.location.href = 'biletypkp.html';
+        }, 100);
+    </script>
+</body>
+</html>
